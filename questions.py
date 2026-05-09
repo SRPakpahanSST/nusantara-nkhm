@@ -4,6 +4,6 @@ QUESTION_BANK = [
         "options": ["Soekarno", "Moh Hatta", "Soekarno-Hatta", "Ahmad Soebarjo"],
         "correct": "Soekarno-Hatta",
         "type": "IQ",
-        "national": true
+        "national": True
     },
 ]
