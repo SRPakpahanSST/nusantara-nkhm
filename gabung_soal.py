@@ -6,36 +6,37 @@ output_file = "/storage/emulated/0/PIDI/AppNkhm/questions.py"
 
 all_questions = []
 
-if not os.path.exists(base_path):
-    print(f"ERROR: Folder {base_path} tidak ditemukan.")
-else:
-    for root, dirs, files in os.walk(base_path):
-        for file in files:
-            if file.endswith('.json'):
-                filepath = os.path.join(root, file)
-                print(f"Memproses: {filepath}")
-                try:
-                    with open(filepath, 'r', encoding='utf-8') as f:
-                        data = json.load(f)
-                    parent_folder = os.path.basename(root)
-                    if 'type' not in data or not data['type']:
-                        if parent_folder in ['IQ','EQ','SQ','AQ']:
-                            data['type'] = parent_folder
-                        else:
-                            data['type'] = 'IQ'
-                    if parent_folder == 'Nasionalisme':
-                        data['national'] = True
-                    elif 'national' not in data:
-                        data['national'] = False
-                    required = ["text", "options", "correct"]
-                    if not all(k in data for k in required):
-                        print(f"  ❌ Skip {file}: field tidak lengkap")
-                        continue
-                    all_questions.append(data)
-                    print(f"  ✅ Loaded: {file} (type={data['type']}, national={data['national']})")
-                except Exception as e:
-                    print(f"  ❌ Error {file}: {e}")
+# Mapping folder ke nama file JSON yang dihasilkan (satu file per folder)
+file_mapping = {
+    "IQ": "iq_1.json",
+    "EQ": "eq_1.json",
+    "SQ": "sq_1.json",
+    "AQ": "aq_1.json",
+    "Nasionalisme": "nasional_1.json"
+}
 
+for folder, filename in file_mapping.items():
+    filepath = os.path.join(base_path, folder, filename)
+    if not os.path.exists(filepath):
+        print(f"⚠️ File tidak ditemukan: {filepath}")
+        continue
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        if not isinstance(data, list):
+            print(f"❌ Skip {filepath}: bukan array/list")
+            continue
+        # Validasi setiap soal minimal punya field yang diperlukan
+        for soal in data:
+            if not all(k in soal for k in ["text", "options", "correct", "type", "national"]):
+                print(f"⚠️ Soal dalam {filepath} tidak lengkap, diskip")
+                continue
+            all_questions.append(soal)
+        print(f"✅ Membaca {len(data)} soal dari {folder}")
+    except Exception as e:
+        print(f"❌ Error membaca {filepath}: {e}")
+
+# Tulis ke questions.py
 with open(output_file, 'w', encoding='utf-8') as f:
     f.write("QUESTION_BANK = [\n")
     for q in all_questions:
@@ -49,4 +50,4 @@ with open(output_file, 'w', encoding='utf-8') as f:
         f.write("    },\n")
     f.write("]\n")
 
-print(f"\n✅ SELESAI: {len(all_questions)} soal digabung ke {output_file}")
+print(f"\n✅ SELESAI: {len(all_questions)} soal total digabung ke {output_file}")
