@@ -1,4 +1,3 @@
-
 import os
 import json
 
@@ -18,19 +17,16 @@ else:
                 try:
                     with open(filepath, 'r', encoding='utf-8') as f:
                         data = json.load(f)
-                    # Tentukan type berdasarkan nama folder induk terdekat
                     parent_folder = os.path.basename(root)
                     if 'type' not in data or not data['type']:
                         if parent_folder in ['IQ','EQ','SQ','AQ']:
                             data['type'] = parent_folder
                         else:
-                            data['type'] = 'IQ'  # default
-                    # Tentukan national: jika parent_folder = 'Nasional' atau field national True
-                    if parent_folder == 'Nasional':
+                            data['type'] = 'IQ'
+                    if parent_folder == 'Nasionalisme':
                         data['national'] = True
                     elif 'national' not in data:
                         data['national'] = False
-                    # Validasi minimal
                     required = ["text", "options", "correct"]
                     if not all(k in data for k in required):
                         print(f"  ❌ Skip {file}: field tidak lengkap")
@@ -40,7 +36,6 @@ else:
                 except Exception as e:
                     print(f"  ❌ Error {file}: {e}")
 
-# Tulis ke output
 with open(output_file, 'w', encoding='utf-8') as f:
     f.write("QUESTION_BANK = [\n")
     for q in all_questions:
@@ -49,7 +44,8 @@ with open(output_file, 'w', encoding='utf-8') as f:
         f.write(f'        "options": {json.dumps(q["options"])},\n')
         f.write(f'        "correct": {json.dumps(q["correct"])},\n')
         f.write(f'        "type": "{q["type"]}",\n')
-        f.write(f'        "national": {json.dumps(q["national"])}\n')
+        national_str = "True" if q["national"] else "False"
+        f.write(f'        "national": {national_str}\n')
         f.write("    },\n")
     f.write("]\n")
 
