@@ -1,4 +1,3 @@
-
 QUESTION_BANK = [
     {
         "text": "Siapa presiden pertama Indonesia?",
