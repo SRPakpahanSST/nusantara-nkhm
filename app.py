@@ -43,7 +43,17 @@ if "history" not in st.session_state:
 if "total_questions" not in st.session_state:
     st.session_state.total_questions = 0
 
-from questions import QUESTION_BANK
+#from questions import QUESTION_BANK
+QUESTION_BANK = [
+    {
+        "text": "Siapa yang membacakan teks proklamasi?",
+        "options": ["Soekarno", "Moh Hatta", "Soekarno-Hatta", "Ahmad Soebarjo"],
+        "correct": "Soekarno-Hatta",
+        "type": "IQ",
+        "national": True
+    },
+    # ... soal lainnya
+]
 
 def calculate_nkhm(iq, eq, sq, aq):
     pembilang = (iq + eq) * (sq + aq)
