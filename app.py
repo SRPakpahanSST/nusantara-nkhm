@@ -3,6 +3,9 @@ import pandas as pd
 import random
 from datetime import datetime
 
+from splash import show_splash
+show_splash()
+
 st.set_page_config(
     page_title="NKHM Nusantara",
     page_icon="🇮🇩",
