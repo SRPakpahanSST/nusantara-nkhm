@@ -43,7 +43,7 @@ if "history" not in st.session_state:
 if "total_questions" not in st.session_state:
     st.session_state.total_questions = 0
 
-#from questions import QUESTION_BANK
+from questions import QUESTION_BANK
 QUESTION_BANK = [
     {
         "text": "Siapa yang membacakan teks proklamasi?",
