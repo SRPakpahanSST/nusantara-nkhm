@@ -1,4 +1,4 @@
-llllQUESTION_BANK = [
+QUESTION_BANK = [
     {
         "text": "Apa lambang negara Indonesia?",
         "options": ["Garuda Pancasila", "Banteng", "Padi Kapas", "Bintang"],
