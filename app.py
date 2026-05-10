@@ -2,17 +2,50 @@ import streamlit as st
 import pandas as pd
 import random
 from datetime import datetime
+import os
 
-from splash import show_splash
-show_splash()
+# ========== SPLASH SCREEN ==========
+if not st.session_state.get("splash_selesai", False):
+    # Konfigurasi halaman splash
+    st.set_page_config(page_title="NKHM Nusantara", page_icon="🇮🇩", layout="wide")
+    
+    # Tempat untuk splash
+    splash_holder = st.empty()
+    with splash_holder.container():
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            # Tampilkan logo PMD Pakpahan Ministry (jika file ada)
+            logo_path = "pmd_logo.jpg"  # Ganti dengan nama file gambar Anda
+            if os.path.exists(logo_path):
+                st.image(logo_path, width=200)
+            else:
+                # Fallback teks jika gambar belum diupload
+                st.markdown("<h1 style='text-align: center;'>PMD</h1>", unsafe_allow_html=True)
+                st.markdown("<h3 style='text-align: center;'>Pakpahan Ministry</h3>", unsafe_allow_html=True)
+            
+            st.markdown("<h1 style='text-align: center;'>🇮🇩 NKHM Nusantara</h1>", unsafe_allow_html=True)
+            st.markdown("<h3 style='text-align: center;'>Asah 4 Kecerdasan + Nasionalisme</h3>", unsafe_allow_html=True)
+            st.markdown("---")
+            st.markdown("""
+            <div style='text-align: center;'>
+                <p>🧠 <b>IQ</b> – Kecerdasan Intelektual<br>
+                ❤️ <b>EQ</b> – Kecerdasan Emosi<br>
+                🙏 <b>SQ</b> – Kecerdasan Spiritual<br>
+                💪 <b>AQ</b> – Kecerdasan Daya Juang</p>
+                <p>Berbasis nilai kebangsaan dan sejarah Indonesia.</p>
+                <p><b>Rumus NKHM:</b> ((IQ+EQ)×(SQ+AQ)) / ((IQ+EQ)+(SQ+AQ))</p>
+            </div>
+            """, unsafe_allow_html=True)
+            st.markdown("---")
+            if st.button("🚀 Mulai Sekarang", use_container_width=True):
+                st.session_state.splash_selesai = True
+                st.rerun()
+    st.stop()
 
-st.set_page_config(
-    page_title="NKHM Nusantara",
-    page_icon="🇮🇩",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+# ========== APLIKASI UTAMA (setelah splash) ==========
+st.set_page_config(page_title="NKHM Nusantara", page_icon="🇮🇩", layout="wide")
 
+# Custom CSS
 st.markdown("""
 <style>
     .stButton > button {
@@ -37,6 +70,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# Inisialisasi session state
 if "user" not in st.session_state:
     st.session_state.user = ""
 if "scores" not in st.session_state:
@@ -46,7 +80,7 @@ if "history" not in st.session_state:
 if "total_questions" not in st.session_state:
     st.session_state.total_questions = 0
 
-#from questions import QUESTION_BANK
+# ========== BANK SOAL (Contoh, ganti dengan ribuan soal Anda) ==========
 QUESTION_BANK = [
     {
         "text": "Siapa yang membacakan teks proklamasi kemerdekaan Indonesia?",
@@ -54,9 +88,11 @@ QUESTION_BANK = [
         "correct": "Soekarno-Hatta",
         "type": "IQ",
         "national": True
-    }
+    },
+    # ... Tambahkan semua soal Anda di sini ...
 ]
 
+# Fungsi NKHM
 def calculate_nkhm(iq, eq, sq, aq):
     pembilang = (iq + eq) * (sq + aq)
     penyebut = (iq + eq) + (sq + aq)
@@ -74,6 +110,7 @@ def get_nkhm_level(nkhm):
     else:
         return "🌿 Perintis Jalan", "gray"
 
+# ========== LOGIN ==========
 if not st.session_state.user:
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
@@ -81,9 +118,7 @@ if not st.session_state.user:
         st.title("🇮🇩 NKHM NUSANTARA")
         st.markdown("### Asah 4 Kecerdasan + Nasionalisme")
         st.markdown("---")
-        
         name = st.text_input("🖊️ Masukkan namamu", placeholder="contoh: Budi Santoso")
-        
         col_a, col_b = st.columns(2)
         with col_a:
             st.caption("🧠 IQ = Intelektual")
@@ -91,7 +126,6 @@ if not st.session_state.user:
         with col_b:
             st.caption("🙏 SQ = Spiritual")
             st.caption("💪 AQ = Daya Juang")
-        
         if st.button("🚀 MULAI BELAJAR", use_container_width=True):
             if name and name.strip():
                 st.session_state.user = name.strip()
@@ -105,14 +139,14 @@ else:
         st.session_state.scores["SQ"],
         st.session_state.scores["AQ"]
     )
-    nkhm_level, level_color = get_nkhm_level(nkhm)
+    nkhm_level, _ = get_nkhm_level(nkhm)
     
     with st.sidebar:
         st.markdown(f"## 👤 {st.session_state.user}")
         st.markdown("---")
         st.markdown(f"### 🎯 NKHM: **{nkhm}**")
         st.markdown(f"*Level: {nkhm_level}*")
-        st.progress(min(nkhm/100, 1.0), text=f"Progress ke level berikutnya")
+        st.progress(min(nkhm/100, 1.0), text="Progress ke level berikutnya")
         st.markdown("---")
         st.markdown("### 📊 Skor Kecerdasan")
         for t in ["IQ", "EQ", "SQ", "AQ"]:
@@ -122,7 +156,8 @@ else:
         with col1:
             st.metric("📖 Total Soal", st.session_state.total_questions)
         with col2:
-            st.metric("🏆 Best NKHM", max([h.get("nkhm", 0) for h in st.session_state.history] + [nkhm]))
+            best = max([h.get("nkhm", 0) for h in st.session_state.history] + [nkhm])
+            st.metric("🏆 Best NKHM", best)
         if st.button("🔄 Reset Semua Skor", use_container_width=True):
             st.session_state.scores = {"IQ": 0, "EQ": 0, "SQ": 0, "AQ": 0}
             st.session_state.history = []
@@ -131,6 +166,7 @@ else:
     
     tab1, tab2, tab3 = st.tabs(["🎮 MAIN KUIS", "📊 DASHBOARD", "🏆 PRESTASI"])
     
+    # Tab Kuis (sama seperti sebelumnya, potongan di bawah)
     with tab1:
         st.markdown("### 🎮 Pilih Kuis")
         filter_col1, filter_col2 = st.columns(2)
@@ -154,8 +190,7 @@ else:
                 st.session_state.current_q = random.choice(filtered)
                 st.session_state.answered = False
             
-            q = st.session_state.current_q
-            
+            q = st.session_state.current_q            
             with st.container():
                 st.markdown("---")
                 st.markdown(f"### 📝 {q['text']}")
@@ -168,36 +203,22 @@ else:
                     else:
                         st.info("📚 Umum")
                 with col_tag3:
-                    point_display = "+10 poin" if not st.session_state.answered else "✅ Sudah dijawab"
-                    st.caption(point_display)
+                    st.caption("+10 poin" if not st.session_state.answered else "✅ Sudah dijawab")
                 st.markdown("---")
-                
-                selected = st.radio(
-                    "Pilih jawabanmu:",
-                    q['options'],
-                    key=f"q_{q['text']}_{st.session_state.answered}",
-                    disabled=st.session_state.answered
-                )
-                
+                selected = st.radio("Pilih jawabanmu:", q['options'], key=f"q_{q['text']}_{st.session_state.answered}", disabled=st.session_state.answered)
                 if st.button("✅ JAWAB", use_container_width=True, disabled=st.session_state.answered):
                     st.session_state.answered = True
                     st.session_state.total_questions += 1
-                    
                     if selected == q['correct']:
-                        points = 10
-                        st.session_state.scores[q['type']] = min(100, st.session_state.scores[q['type']] + points)
-                        st.success(f"✅ **BENAR!** +{points} poin untuk {q['type']}")
+                        st.session_state.scores[q['type']] = min(100, st.session_state.scores[q['type']] + 10)
+                        st.success(f"✅ **BENAR!** +10 poin untuk {q['type']}")
                     else:
-                        st.error(f"❌ **SALAH!** Jawaban benar adalah: **{q['correct']}**")
-                    
+                        st.error(f"❌ **SALAH!** Jawaban benar: **{q['correct']}**")
                     st.session_state.history.append({
                         "timestamp": datetime.now().strftime("%H:%M:%S"),
                         "question": q['text'][:50] + "...",
                         "type": q['type'],
-                        "national": q['national'],
                         "correct": selected == q['correct'],
-                        "user_answer": selected,
-                        "correct_answer": q['correct'],
                         "nkhm": calculate_nkhm(
                             st.session_state.scores["IQ"],
                             st.session_state.scores["EQ"],
@@ -205,12 +226,10 @@ else:
                             st.session_state.scores["AQ"]
                         )
                     })
-                    
                     if st.button("⏩ SOAL SELANJUTNYA", use_container_width=True):
                         st.session_state.current_q = random.choice(filtered)
                         st.session_state.answered = False
                         st.rerun()
-                
                 if st.session_state.answered:
                     if st.button("🎮 Kuis Baru", use_container_width=True):
                         st.session_state.current_q = random.choice(filtered)
@@ -219,46 +238,18 @@ else:
     
     with tab2:
         st.markdown("### 📊 Dashboard Perkembangan")
-        col_chart, col_stats = st.columns([2, 1])
-        with col_chart:
-            df_chart = pd.DataFrame({
-                "Kecerdasan": ["IQ", "EQ", "SQ", "AQ"],
-                "Skor": [
-                    st.session_state.scores["IQ"],
-                    st.session_state.scores["EQ"],
-                    st.session_state.scores["SQ"],
-                    st.session_state.scores["AQ"]
-                ]
-            })
-            st.bar_chart(df_chart.set_index("Kecerdasan"), height=300)
-        with col_stats:
-            st.markdown("### 📈 Statistik")
-            persentase_iq = st.session_state.scores["IQ"]
-            persentase_eq = st.session_state.scores["EQ"]
-            persentase_sq = st.session_state.scores["SQ"]
-            persentase_aq = st.session_state.scores["AQ"]
-            st.markdown(f"""
-            - 🧠 **IQ:** {persentase_iq}%
-            - ❤️ **EQ:** {persentase_eq}%
-            - 🙏 **SQ:** {persentase_sq}%
-            - 💪 **AQ:** {persentase_aq}%
-            """)
-        st.markdown("---")
+        df_chart = pd.DataFrame({
+            "Kecerdasan": ["IQ", "EQ", "SQ", "AQ"],
+            "Skor": [st.session_state.scores["IQ"], st.session_state.scores["EQ"], st.session_state.scores["SQ"], st.session_state.scores["AQ"]]
+        })
+        st.bar_chart(df_chart.set_index("Kecerdasan"), height=300)
         st.markdown("### 📝 Rekomendasi Peningkatan")
         lowest = min(st.session_state.scores, key=st.session_state.scores.get)
         if st.session_state.scores[lowest] < 50:
-            if lowest == "IQ":
-                st.info("📚 **Tingkatkan IQ-mu:** Baca buku sejarah Indonesia, coba teka-teki silang, atau main puzzle!")
-            elif lowest == "EQ":
-                st.info("❤️ **Tingkatkan EQ-mu:** Latih mendengarkan orang lain, ikut kegiatan sosial, atau jurnal perasaan!")
-            elif lowest == "SQ":
-                st.info("🙏 **Tingkatkan SQ-mu:** Pelajari nilai-nilai Pancasila, ikut kegiatan kerohanian, atau refleksi diri!")
-            else:
-                st.info("💪 **Tingkatkan AQ-mu:** Tantang dirimu dengan target harian, jangan mudah menyerah, belajar dari kegagalan!")
+            st.info(f"💡 **Tingkatkan {lowest}:** Latihan lebih giat di bagian {lowest}!")
         else:
-            st.success("🌟 Luar biasa! Semua kecerdasanmu sudah terasah dengan baik. Pertahankan!")
+            st.success("🌟 Semua kecerdasan sudah terasah dengan baik!")
         if st.session_state.history:
-            st.markdown("---")
             st.markdown("### 📜 Riwayat Kuis (10 Terakhir)")
             history_df = pd.DataFrame(st.session_state.history[-10:])
             history_df = history_df[["timestamp", "type", "question", "correct"]]
@@ -268,43 +259,21 @@ else:
     
     with tab3:
         st.markdown("### 🏆 Pencapaianmu")
-        col1, col2, col3, col4 = st.columns(4)
-        badges = {
-            "IQ": ("🧠", "Cendekia Nusantara", 50),
-            "EQ": ("❤️", "Empati Bangsa", 50),
-            "SQ": ("🙏", "Bhinneka Sejati", 50),
-            "AQ": ("💪", "Pejuang Tangguh", 50)
-        }
-        for i, (t, (icon, name, target)) in enumerate(badges.items()):
-            cols = [col1, col2, col3, col4]
-            with cols[i]:
-                if st.session_state.scores[t] >= target:
-                    st.success(f"{icon}\n**{name}**\n✅ Teraih!")
-                else:
-                    st.caption(f"{icon}\n{name}\n🔒 {target - st.session_state.scores[t]} poin lagi")
-        st.markdown("---")
+        cols = st.columns(4)
+        badges = {"IQ": "🧠 Cendekia", "EQ": "❤️ Empati", "SQ": "🙏 Bhinneka", "AQ": "💪 Tangguh"}
+        for i, (t, label) in enumerate(badges.items()):
+            if st.session_state.scores[t] >= 50:
+                cols[i].success(f"✅ **{label}**")
+            else:
+                cols[i].info(f"🔒 {label} (butuh 50)")
         if all(st.session_state.scores[t] >= 50 for t in ["IQ", "EQ", "SQ", "AQ"]):
             st.balloons()
-            st.success("""
-            ## 🎉 SELAMAT! 🎉
-            ### Anda telah meraih gelar tertinggi:
-            # **PAHLAWAN CERDAS NUSANTARA**
-            
-            Anda telah mengasah keempat kecerdasan secara seimbang!
-            """)
-        elif nkhm >= 60:
-            st.info("## 🌟 Cendekia Muda\nTerus tingkatkan kecerdasan yang masih rendah menuju gelar Pahlawan Cerdas!")
+            st.success("🎉 **GELAR: PAHLAWAN CERDAS NUSANTARA!** 🎉")
         st.markdown("---")
-        st.markdown("### 📊 Ringkasan Belajar")
         answered = len(st.session_state.history)
         correct = sum(1 for h in st.session_state.history if h["correct"])
         accuracy = (correct / answered * 100) if answered > 0 else 0
-        metric_col1, metric_col2, metric_col3, metric_col4 = st.columns(4)
-        with metric_col1:
-            st.metric("📖 Total Soal", answered)
-        with metric_col2:
-            st.metric("✅ Benar", correct)
-        with metric_col3:
-            st.metric("❌ Salah", answered - correct)
-        with metric_col4:
-            st.metric("📊 Akurasi", f"{accuracy:.1f}%")
+        col1, col2, col3 = st.columns(3)
+        col1.metric("📖 Total Soal", answered)
+        col2.metric("✅ Benar", correct)
+        col3.metric("📊 Akurasi", f"{accuracy:.1f}%")
