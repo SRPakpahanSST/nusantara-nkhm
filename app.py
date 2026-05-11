@@ -18,8 +18,10 @@ if not st.session_state.get("splash_selesai", False):
         with col_tengah:
             # 1. Gambar logo (pakai raw URL dari GitHub)
             logo_url = "https://raw.githubusercontent.com/SRPakpahanSST/nusantara-nkhm/main/assets/pmd_logo.jpg"
-            st.image(logo_url, justify-content: center, width=180)   # ukuran logo bisa disesuaikan
-
+            st.markdown(
+    f'<div style="display: flex; justify-content: center;"><img src="{logo_url}" width="180"></div>',
+    unsafe_allow_html=True
+)
             # 2. Judul "NKHM Nusantara"
             st.markdown(
                 "<h1 style='text-align: center;'>NKHM Nusantara</h1>",
