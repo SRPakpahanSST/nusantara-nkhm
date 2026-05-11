@@ -8,34 +8,58 @@ import os
 
 if not st.session_state.get("splash_selesai", False):
     st.set_page_config(page_title="NKHM Nusantara", page_icon="🇮🇩", layout="wide")
+
+    # CSS untuk membuat gambar di kolom menjadi center
+    st.markdown("""
+    <style>
+    /* Memusatkan gambar di dalam kolom */
+    [data-testid="column"] img {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    /* Styling tombol */
+    div.stButton > button {
+        background-color: #4CAF50;
+        color: white;
+        font-size: 22px;
+        font-weight: bold;
+        border-radius: 12px;
+        padding: 12px 24px;
+        width: 100%;
+    }
+    div.stButton > button:hover {
+        background-color: #45a049;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     splash_holder = st.empty()
     with splash_holder.container():
-        # Gunakan HTML center
-        st.markdown("<center>", unsafe_allow_html=True)
-        logo_url = "https://raw.githubusercontent.com/SRPakpahanSST/nusantara-nkhm/main/assets/pmd_logo.jpg"
-        st.image(logo_url, width=180)
-        st.markdown("<h1>NKHM Nusantara</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='font-size:18px'>Aplikasi gaming 4 Kecerdasan (IQ, EQ, SQ, AQ) + Nasionalisme<br>Berbasis Perkembangan Data Personal</p>", unsafe_allow_html=True)
-        st.markdown("</center>", unsafe_allow_html=True)
-        
-        # CSS tombol hijau besar
-        st.markdown("""
-        <style>
-        div.stButton > button {
-            background-color: #4CAF50;
-            color: white;
-            font-size: 22px;
-            font-weight: bold;
-            border-radius: 12px;
-            padding: 12px;
-            width: 100%;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-        
-        if st.button("🚀 Mulai", use_container_width=True):
-            st.session_state.splash_selesai = True
-            st.rerun()
+        # Layout 3 kolom untuk center
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            # Gambar logo (gunakan raw URL GitHub)
+            logo_url = "https://raw.githubusercontent.com/SRPakpahanSST/nusantara-nkhm/main/assets/pmd_logo.jpg"
+            st.image(logo_url, width=180)
+
+            # Judul
+            st.markdown(
+                "<h1 style='text-align: center;'>NKHM Nusantara</h1>",
+                unsafe_allow_html=True,
+            )
+
+            # Deskripsi tambahan
+            st.markdown(
+                "<p style='text-align: center; font-size: 18px;'>Aplikasi gaming 4 Kecerdasan (IQ, EQ, SQ, AQ) + Nasionalisme<br>Berbasis Perkembangan Data Personal</p>",
+                unsafe_allow_html=True,
+            )
+
+            # Tombol Mulai
+            if st.button("🚀 Mulai", use_container_width=True):
+                st.session_state.splash_selesai = True
+                st.rerun()
+
     st.stop()
     
     # Tempat untuk splash
