@@ -9,59 +9,56 @@ import os
 if not st.session_state.get("splash_selesai", False):
     st.set_page_config(page_title="NKHM Nusantara", page_icon="🇮🇩", layout="wide")
 
-    # CSS untuk membuat gambar di kolom menjadi center
-    st.markdown("""
-    <style>
-    /* Memusatkan gambar di dalam kolom */
-    [data-testid="column"] img {
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    /* Styling tombol */
-    div.stButton > button {
-        background-color: #4CAF50;
-        color: white;
-        font-size: 22px;
-        font-weight: bold;
-        border-radius: 12px;
-        padding: 12px 24px;
-        width: 100%;
-    }
-    div.stButton > button:hover {
-        background-color: #45a049;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
+    # Kosongkan area utama
     splash_holder = st.empty()
-    with splash_holder.container():
-        # Layout 3 kolom untuk center
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            # Gambar logo (gunakan raw URL GitHub)
-            st.markdown(
-                f'<div style="display: flex; justify-content: center;"><img src="{https://raw.githubusercontent.com/SRPakpahanSST/nusantara-nkhm/main/assets/pmd_logo.jpg}", width="180"></div>',
-    unsafe_allow_html=True
-)
 
-            # Judul
+    with splash_holder.container():
+        # ----- Layout 3 kolom untuk center -----
+        col_kiri, col_tengah, col_kanan = st.columns([1, 2, 1])
+        with col_tengah:
+            # 1. Gambar logo (pakai raw URL dari GitHub)
+            logo_url = "https://raw.githubusercontent.com/SRPakpahanSST/nusantara-nkhm/main/assets/pmd_logo.jpg"
+            st.image(logo_url, width=180)   # ukuran logo bisa disesuaikan
+
+            # 2. Judul "NKHM Nusantara"
             st.markdown(
                 "<h1 style='text-align: center;'>NKHM Nusantara</h1>",
                 unsafe_allow_html=True,
             )
 
-            # Deskripsi tambahan
+            # 3. Deskripsi tambahan (baris kedua)
             st.markdown(
                 "<p style='text-align: center; font-size: 18px;'>Aplikasi gaming 4 Kecerdasan (IQ, EQ, SQ, AQ) + Nasionalisme<br>Berbasis Perkembangan Data Personal</p>",
                 unsafe_allow_html=True,
             )
 
-            # Tombol Mulai
+            # 4. CSS untuk tombol hijau & besar
+            st.markdown(
+                """
+                <style>
+                div.stButton > button {
+                    background-color: #4CAF50;
+                    color: white;
+                    font-size: 22px;
+                    font-weight: bold;
+                    border-radius: 12px;
+                    padding: 12px 24px;
+                    width: 100%;
+                }
+                div.stButton > button:hover {
+                    background-color: #45a049;
+                }
+                </style>
+                """,
+                unsafe_allow_html=True,
+            )
+
+            # 5. Tombol "Mulai"
             if st.button("🚀 Mulai", use_container_width=True):
                 st.session_state.splash_selesai = True
                 st.rerun()
 
+    # Hentikan eksekusi aplikasi utama sampai tombol ditekan
     st.stop()
     
     # Tempat untuk splash
