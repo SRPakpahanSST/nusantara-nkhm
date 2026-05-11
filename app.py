@@ -1,4 +1,4 @@
-lr y𝔩import streamlit as st
+import streamlit as st
 import pandas as pd
 import random
 from datetime import datetime
