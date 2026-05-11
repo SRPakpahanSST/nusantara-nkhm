@@ -40,8 +40,10 @@ if not st.session_state.get("splash_selesai", False):
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
             # Gambar logo (gunakan raw URL GitHub)
-            logo_url = "https://raw.githubusercontent.com/SRPakpahanSST/nusantara-nkhm/main/assets/pmd_logo.jpg"
-            st.image(logo_url, width=180)
+            st.markdown(
+    f'<div style="display: flex; justify-content: center;"><img src="{logo_url}" width="180"></div>',
+    unsafe_allow_html=True
+)
 
             # Judul
             st.markdown(
