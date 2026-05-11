@@ -41,7 +41,7 @@ if not st.session_state.get("splash_selesai", False):
         with col2:
             # Gambar logo (gunakan raw URL GitHub)
             st.markdown(
-     f'<div style="display: flex; justify-content: center;"><img src="{assets/logo_pmd.jpg}" width="180"></div>',
+     f'<div style="display: flex; justify-content: center;"><img src="{assets/pmd_logo.jpg}" width="180"></div>',
     unsafe_allow_html=True
 )
 
