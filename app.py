@@ -10,13 +10,15 @@ if not st.session_state.get("splash_selesai", False):
     st.set_page_config(page_title="NKHM Nusantara", page_icon="🇮🇩", layout="wide")
     splash_holder = st.empty()
     with splash_holder.container():
-        st.markdown('<div align="center">', unsafe_allow_html=True)
+        # Gunakan HTML center
+        st.markdown("<center>", unsafe_allow_html=True)
         logo_url = "https://raw.githubusercontent.com/SRPakpahanSST/nusantara-nkhm/main/assets/pmd_logo.jpg"
         st.image(logo_url, width=180)
         st.markdown("<h1>NKHM Nusantara</h1>", unsafe_allow_html=True)
         st.markdown("<p style='font-size:18px'>Aplikasi gaming 4 Kecerdasan (IQ, EQ, SQ, AQ) + Nasionalisme<br>Berbasis Perkembangan Data Personal</p>", unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("</center>", unsafe_allow_html=True)
         
+        # CSS tombol hijau besar
         st.markdown("""
         <style>
         div.stButton > button {
@@ -34,7 +36,7 @@ if not st.session_state.get("splash_selesai", False):
         if st.button("🚀 Mulai", use_container_width=True):
             st.session_state.splash_selesai = True
             st.rerun()
-    st.stop()    
+    st.stop()
     
     # Tempat untuk splash
     splash_holder = st.empty()
