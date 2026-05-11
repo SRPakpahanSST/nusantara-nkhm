@@ -15,7 +15,7 @@ if not st.session_state.get("splash_selesai", False):
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
             # Tampilkan logo PMD Pakpahan Ministry (jika file ada)
-            logo_path = "pmd_logo.jpg"  # Ganti dengan nama file gambar Anda
+            logo_path = "assets/pmd_logo.jpg"  # Ganti dengan nama file gambar Anda
             if os.path.exists(logo_path):
                 st.image(logo_path, width=200)
             else:
