@@ -6,8 +6,12 @@ import os
 
 # ========== SPLASH SCREEN ==========
 if not st.session_state.get("splash_selesai", False):
-    # Konfigurasi halaman splash
-    st.set_page_config(page_title="NKHM Nusantara", page_icon="🇮🇩", layout="wide")
+    st.image("https://raw.githubusercontent.com/SRPakpahanSST/nusantara-nkhm/main/assets/pmd_logo.jpg", width=200)
+    st.markdown("## NKHM Nusantara")
+    if st.button("Mulai"):
+        st.session_state.splash_selesai = True
+        st.rerun()
+    st.stop()
     
     # Tempat untuk splash
     splash_holder = st.empty()
