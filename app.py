@@ -2,6 +2,100 @@ import streamlit as st
 import pandas as pd
 import random
 from datetime import datetime
+import os
+
+# ... semua import dari aplikasi utama kamu ...
+from langchain.memory import ConversationBufferMemory
+from langchain_openai import ChatOpenAI
+from langchain.chains import LLMChain
+import time
+from typing import List, Dict
+
+
+from openai import OpenAI
+client = OpenAI(api_key=st.secrets["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"])
+
+# --- FUNGSI UNTUK ASISTEN AI ---
+def setup_ai_assistant():
+    """Fungsi untuk menginisialisasi komponen AI"""
+    if "ai_memory" not in st.session_state:
+        st.session_state.ai_memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+    
+    if "profile_context" not in st.session_state:
+        st.session_state.profile_context = ""
+    
+    if "ai_conversation" not in st.session_state:
+        st.session_state.ai_conversation = []
+
+def update_profile_context():
+    """Memperbarui konteks percakapan berdasarkan profil pengguna"""
+    scores = st.session_state.scores
+    profile_string = (
+        f"Pengguna bernama {st.session_state.user}. "
+        f"Ini adalah skor kecerdasan mereka saat ini: IQ={scores['IQ']}, EQ={scores['EQ']}, "
+        f"SQ={scores['SQ']}, AQ={scores['AQ']}. "
+        f"Total soal yang telah dijawab: {st.session_state.total_questions} dari 595 soal yang tersedia. "
+    )
+    if scores['IQ'] < 50:
+        profile_string += "Kecerdasan Intelektual (IQ) mereka masih di bawah 50. Mereka membutuhkan rekomendasi soal yang lebih menantang, motivasi untuk belajar lebih giat, atau tips belajar. "
+    if scores['EQ'] < 50:
+        profile_string += "Kecerdasan Emosional (EQ) mereka masih di bawah 50. Bantu mereka dengan nasihat tentang empati, pengelolaan emosi, atau komunikasi efektif. "
+    # Tambahkan kondisi serupa untuk SQ dan AQ
+    
+    st.session_state.profile_context = profile_string
+
+def get_ai_response(user_input: str, messages: List[Dict]) -> str:
+    """Fungsi untuk mendapatkan respons dari AI dengan konteks profil"""
+    # Ambil kunci API dari secrets
+    if "OPENAI_API_KEY" not in st.secrets:
+        return "Maaf, fitur AI belum diatur. Silakan hubungi administrator."
+    
+    try:
+        # Setup model
+        llm = ChatOpenAI(
+            api_key=st.secrets["OPENAI_API_KEY"],
+            model="gpt-3.5-turbo",
+            temperature=0.7,
+            streaming=True
+        )
+        
+        # Sistem prompt yang personal
+        system_prompt = f"""Kamu adalah Ki Hajar, seorang asisten AI yang hangat dan bijaksana di aplikasi NKHM Nusantara. 
+        Tugasmu adalah membantu pengguna memahami konsep kecerdasan (IQ, EQ, SQ, AQ), memberikan motivasi belajar, 
+        merekomendasikan soal berdasarkan kelemahan mereka, dan menjawab pertanyaan seputar kebangsaan Indonesia.
+        
+        Informasi profil pengguna saat ini: {st.session_state.profile_context}
+        
+        Petunjuk:
+        1. Gunakan sapaan yang ramah dan panggil pengguna dengan namanya jika memungkinkan.
+        2. Jika skor kecerdasan tertentu rendah, tawarkan bantuan spesifik untuk meningkatkannya.
+        3. Selalu kaitkan jawaban dengan semangat nasionalisme dan belajar sepanjang hayat.
+        """
+        
+        # Siapkan pesan untuk API
+        prepared_messages = [{"role": "system", "content": system_prompt}]
+        # Tambahkan riwayat percakapan terakhir
+        for msg in messages[-10:]:  # 10 pesan terakhir saja
+            prepared_messages.append(msg)
+        # Tambahkan pertanyaan pengguna saat ini
+        prepared_messages.append({"role": "user", "content": user_input})
+        
+        # Panggil API dengan streaming
+        response = llm.stream(prepared_messages)
+        
+        # Kumpulkan respons secara bertahap untuk efek mengetik
+        full_response = ""
+        for chunk in response:
+            if chunk.content:
+                full_response += chunk.content
+                yield full_response
+                time.sleep(0.02)  # Simulasi efek mengetik
+        return full_response
+        
+    except Exception as e:
+        error_msg = f"Maaf, terjadi kesalahan teknis: {str(e)}"
+        yield error_msg
+        return error_msg
 
 # ========== SPLASH SCREEN ==========𝐪𝐩𝐚𝐦𝐲𝐦 𝐥
 
@@ -94,6 +188,52 @@ if not st.session_state.get("splash_selesai", False):
                 st.session_state.splash_selesai = True
                 st.rerun()
     st.stop()
+    
+# --- ASISTEN AI DI DALAM SIDEBAR ---
+# Pastikan komponen AI diinisialisasi
+setup_ai_assistant()
+
+# Gunakan sidebar yang sudah ada untuk menampilkan AI
+with st.sidebar:
+    st.markdown("---")
+    st.markdown("## 🤖 Asisten Ki Hajar")
+    
+    # Tampilkan riwayat chat
+    chat_container = st.container()
+    with chat_container:
+        for message in st.session_state.ai_conversation:
+            if message["role"] == "user":
+                with st.chat_message("user"):
+                    st.write(message["content"])
+            else:
+                with st.chat_message("assistant", avatar="🤖"):
+                    st.write(message["content"])
+
+    # Input chat dari pengguna
+    user_question = st.chat_input("Tanyakan sesuatu pada Ki Hajar...")
+    
+    if user_question:
+        # Tambahkan pertanyaan ke riwayat
+        st.session_state.ai_conversation.append({"role": "user", "content": user_question})
+        with chat_container:
+            with st.chat_message("user"):
+                st.write(user_question)
+        
+        # Update konteks profil sebelum merespon
+        update_profile_context()
+        
+        # Dapatkan respons AI dengan efek mengetik
+        with st.chat_message("assistant", avatar="🤖"):
+            response_placeholder = st.empty()
+            full_response = ""
+            for chunk in get_ai_response(user_question, st.session_state.ai_conversation):
+                full_response += chunk
+                response_placeholder.markdown(full_response + "▌")
+            response_placeholder.markdown(full_response)
+        
+        # Simpan respons AI ke riwayat
+        st.session_state.ai_conversation.append({"role": "assistant", "content": full_response})
+        st.rerun()    
 
 # ========== APLIKASI UTAMA (setelah splash) ==========
 st.set_page_config(page_title="NKHM Nusantara", page_icon="🇮🇩", layout="wide")
@@ -329,4 +469,4 @@ else:
         col1, col2, col3 = st.columns(3)
         col1.metric("📖 Total Soal", answered)
         col2.metric("✅ Benar", correct)
-        col3.metric("📊 Akurasi", f"{accuracy:.1f}%")
+        col3.metric("📊 Akurasi", f"{accuracy:.1f}%")l
