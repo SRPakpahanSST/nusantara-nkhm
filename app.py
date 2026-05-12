@@ -1,67 +1,99 @@
-import streamlit as st
-import pandas as pd
-import random
-from datetime import datetime
+# ========== SPLASH SCREEN ==========𝐪𝐩𝐚𝐦𝐲𝐦 𝐥
 
-# ========== SPLASH SCREEN ==========
 if not st.session_state.get("splash_selesai", False):
     st.set_page_config(page_title="NKHM Nusantara", page_icon="🇮🇩", layout="wide")
 
-    # Tempat untuk splash
+    # Kosongkan area utama
     splash_holder = st.empty()
 
     with splash_holder.container():
-        # Gunakan div dengan text-align:center untuk semua konten
-        st.markdown('<div style="text-align: center;">', unsafe_allow_html=True)
+        # ----- Layout 3 kolom untuk center -----
+        col_kiri, col_tengah, col_kanan = st.columns([1, 2, 1])
+        with col_tengah:
+            # 1. Gambar logo (pakai raw URL dari GitHub)
+            logo_url = "https://raw.githubusercontent.com/SRPakpahanSST/nusantara-nkhm/main/assets/pmd_logo.jpg"
+            st.markdown(
+    f'<div style="display: flex; justify-content: center;"><img src="{logo_url}" width="180"></div>',
+    unsafe_allow_html=True
+)
+            # 2. Judul "NKHM Nusantara"
+            st.markdown(
+                "<h1 style='text-align: center;'>NKHM Nusantara</h1>",
+                unsafe_allow_html=True,
+            )
 
-        # Logo (pastikan URL benar)
-        logo_url = "https://raw.githubusercontent.com/SRPakpahanSST/nusantara-nkhm/main/assets/pmd_logo.jpg"
-        st.markdown(f'<img src="{logo_url}" width="180">', unsafe_allow_html=True)
+            # 3. Deskripsi tambahan (baris kedua)
+            st.markdown(
+                "<p style='text-align: center; font-size: 18px;'>Aplikasi gaming 4 Kecerdasan (IQ, EQ, SQ, AQ) + Nasionalisme<br>Berbasis Perkembangan Data Personal</p>",
+                unsafe_allow_html=True,
+            )
 
-        # Judul
-        st.markdown("<h1>NKHM Nusantara</h1>", unsafe_allow_html=True)
+            # 4. CSS untuk tombol hijau & besar
+            st.markdown(
+                """
+                <style>
+                div.stButton > button {
+                    background-color: #4CAF50;
+                    color: white;
+                    font-size: 22px;
+                    font-weight: bold;
+                    border-radius: 12px;
+                    padding: 12px 24px;
+                    width: 100%;
+                }
+                div.stButton > button:hover {
+                    background-color: #45a049;
+                }
+                </style>
+                """,
+                unsafe_allow_html=True,
+            )
 
-        # Deskripsi
-        st.markdown(
-            "<p style='font-size: 18px;'>Aplikasi gaming 4 Kecerdasan (IQ, EQ, SQ, AQ) + Nasionalisme<br>"
-            "Berbasis Perkembangan Data Personal</p>",
-            unsafe_allow_html=True,
-        )
+            # 5. Tombol "Mulai"
+            if st.button("🚀 Mulai", use_container_width=True):
+                st.session_state.splash_selesai = True
+                st.rerun()
 
-        st.markdown('</div>', unsafe_allow_html=True)
-
-        # CSS tombol hijau besar lebar penuh
-        st.markdown(
-            """
-            <style>
-            div.stButton > button {
-                background-color: #4CAF50;
-                color: white;
-                font-size: 22px;
-                font-weight: bold;
-                border-radius: 12px;
-                padding: 12px;
-                width: 100%;
-            }
-            div.stButton > button:hover {
-                background-color: #45a049;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        # Tombol Mulai
-        if st.button("🚀 Mulai", use_container_width=True):
-            st.session_state.splash_selesai = True
-            st.rerun()
-
-    # Hentikan eksekusi sampai tombol ditekan
+    # Hentikan eksekusi aplikasi utama sampai tombol ditekan
+    st.stop()
+    
+    # Tempat untuk splash
+    splash_holder = st.empty()
+    with splash_holder.container():
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            # Tampilkan logo PMD Pakpahan Ministry (jika file ada)
+            logo_path = "assets/pmd_logo.jpg"  # Ganti dengan nama file gambar Anda
+            if os.path.exists(logo_path):
+                st.image(logo_path, width=200)
+            else:
+                # Fallback teks jika gambar belum diupload
+                st.markdown("<h1 style='text-align: center;'>PMD</h1>", unsafe_allow_html=True)
+                st.markdown("<h3 style='text-align: center;'>Pakpahan Ministry</h3>", unsafe_allow_html=True)
+            
+            st.markdown("<h1 style='text-align: center;'>🇮🇩 NKHM Nusantara</h1>", unsafe_allow_html=True)
+            st.markdown("<h3 style='text-align: center;'>Asah 4 Kecerdasan + Nasionalisme</h3>", unsafe_allow_html=True)
+            st.markdown("---")
+            st.markdown("""
+            <div style='text-align: center;'>
+                <p>🧠 <b>IQ</b> – Kecerdasan Intelektual<br>
+                ❤️ <b>EQ</b> – Kecerdasan Emosi<br>
+                🙏 <b>SQ</b> – Kecerdasan Spiritual<br>
+                💪 <b>AQ</b> – Kecerdasan Daya Juang</p>
+                <p>Berbasis nilai kebangsaan dan sejarah Indonesia.</p>
+                <p><b>Rumus NKHM:</b> ((IQ+EQ)×(SQ+AQ)) / ((IQ+EQ)+(SQ+AQ))</p>
+            </div>
+            """, unsafe_allow_html=True)
+            st.markdown("---")
+            if st.button("🚀 Mulai Sekarang", use_container_width=True):
+                st.session_state.splash_selesai = True
+                st.rerun()
     st.stop()
 
-# ========== APLIKASI UTAMA ==========
+# ========== APLIKASI UTAMA (setelah splash) ==========
 st.set_page_config(page_title="NKHM Nusantara", page_icon="🇮🇩", layout="wide")
 
+# Custom CSS
 st.markdown("""
 <style>
     .stButton > button {
@@ -96,7 +128,7 @@ if "history" not in st.session_state:
 if "total_questions" not in st.session_state:
     st.session_state.total_questions = 0
 
-# ========== BANK SOAL (GANTI DENGAN RIBUAN SOAL ANDA) ==========
+# ========== BANK SOAL (Contoh, ganti dengan ribuan soal Anda) ==========
 QUESTION_BANK = [
     {
         "text": "Siapa yang membacakan teks proklamasi kemerdekaan Indonesia?",
@@ -105,9 +137,10 @@ QUESTION_BANK = [
         "type": "IQ",
         "national": True
     },
-    # Tambahkan semua soal Anda di sini (copy dari questions.py)
+    # ... Tambahkan semua soal Anda di sini ...
 ]
 
+# Fungsi NKHM
 def calculate_nkhm(iq, eq, sq, aq):
     pembilang = (iq + eq) * (sq + aq)
     penyebut = (iq + eq) + (sq + aq)
@@ -181,6 +214,7 @@ else:
     
     tab1, tab2, tab3 = st.tabs(["🎮 MAIN KUIS", "📊 DASHBOARD", "🏆 PRESTASI"])
     
+    # Tab Kuis (sama seperti sebelumnya, potongan di bawah)
     with tab1:
         st.markdown("### 🎮 Pilih Kuis")
         filter_col1, filter_col2 = st.columns(2)
@@ -204,7 +238,7 @@ else:
                 st.session_state.current_q = random.choice(filtered)
                 st.session_state.answered = False
             
-            q = st.session_state.current_q
+            q = st.session_state.current_q            
             with st.container():
                 st.markdown("---")
                 st.markdown(f"### 📝 {q['text']}")
