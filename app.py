@@ -4,12 +4,6 @@ import random
 from datetime import datetime
 import os
 
-# ... semua import dari aplikasi utama kamu ...
-from langchain.memory import ConversationBufferMemory
-from langchain_openai import ChatOpenAI
-from langchain.chains import LLMChain
-import time
-from typing import List, Dict
 
 import openai
 
