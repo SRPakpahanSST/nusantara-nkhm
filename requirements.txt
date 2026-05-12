@@ -1,5 +1,5 @@
 streamlit
 pandas
 
-openai==1.59.9
-tiktoken==0.9.0
+openai
+tiktoken
