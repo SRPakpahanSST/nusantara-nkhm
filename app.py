@@ -3,6 +3,7 @@ import pandas as pd
 import random
 from datetime import datetime
 import os
+import openai
 
 # ... semua import dari aplikasi utama kamu ...
 from langchain.memory import ConversationBufferMemory
@@ -43,59 +44,25 @@ def update_profile_context():
     # Tambahkan kondisi serupa untuk SQ dan AQ
     
     st.session_state.profile_context = profile_string
-
-def get_ai_response(user_input: str, messages: List[Dict]) -> str:
-    """Fungsi untuk mendapatkan respons dari AI dengan konteks profil"""
-    # Ambil kunci API dari secrets
-    if "OPENAI_API_KEY" not in st.secrets:
-        return "Maaf, fitur AI belum diatur. Silakan hubungi administrator."
     
+
+def get_ai_response(user_input, messages):
+    openai.api_key = st.secrets["OPENAI_API_KEY"]
     try:
-        # Setup model
-        llm = ChatOpenAI(
-            api_key=st.secrets["OPENAI_API_KEY"],
+        response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            temperature=0.7,
-            streaming=True
+            messages=messages,
+            stream=True
         )
-        
-        # Sistem prompt yang personal
-        system_prompt = f"""Kamu adalah Ki Hajar, seorang asisten AI yang hangat dan bijaksana di aplikasi NKHM Nusantara. 
-        Tugasmu adalah membantu pengguna memahami konsep kecerdasan (IQ, EQ, SQ, AQ), memberikan motivasi belajar, 
-        merekomendasikan soal berdasarkan kelemahan mereka, dan menjawab pertanyaan seputar kebangsaan Indonesia.
-        
-        Informasi profil pengguna saat ini: {st.session_state.profile_context}
-        
-        Petunjuk:
-        1. Gunakan sapaan yang ramah dan panggil pengguna dengan namanya jika memungkinkan.
-        2. Jika skor kecerdasan tertentu rendah, tawarkan bantuan spesifik untuk meningkatkannya.
-        3. Selalu kaitkan jawaban dengan semangat nasionalisme dan belajar sepanjang hayat.
-        """
-        
-        # Siapkan pesan untuk API
-        prepared_messages = [{"role": "system", "content": system_prompt}]
-        # Tambahkan riwayat percakapan terakhir
-        for msg in messages[-10:]:  # 10 pesan terakhir saja
-            prepared_messages.append(msg)
-        # Tambahkan pertanyaan pengguna saat ini
-        prepared_messages.append({"role": "user", "content": user_input})
-        
-        # Panggil API dengan streaming
-        response = llm.stream(prepared_messages)
-        
-        # Kumpulkan respons secara bertahap untuk efek mengetik
-        full_response = ""
+        full = ""
         for chunk in response:
-            if chunk.content:
-                full_response += chunk.content
-                yield full_response
-                time.sleep(0.02)  # Simulasi efek mengetik
-        return full_response
-        
+            if chunk.choices[0].delta.get("content"):
+                content = chunk.choices[0].delta.content
+                full += content
+                yield full
+                time.sleep(0.02)
     except Exception as e:
-        error_msg = f"Maaf, terjadi kesalahan teknis: {str(e)}"
-        yield error_msg
-        return error_msg
+        yield f"Error: {e}"
 
 # ========== SPLASH SCREEN ==========𝐪𝐩𝐚𝐦𝐲𝐦 𝐥
 
