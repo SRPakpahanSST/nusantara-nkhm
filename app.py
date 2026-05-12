@@ -59,9 +59,9 @@ if "history" not in st.session_state:
 if "total_questions" not in st.session_state:
     st.session_state.total_questions = 0
 if "ai_messages" not in st.session_state:
-    st.session_state.ai_messages = []  # untuk menyimpan percakapan dengan AI
+    st.session_state.ai_messages = []
 
-# ========== BANK SOAL (CONTOH, GANTI DENGAN RIBUAN SOAL ANDA) ==========
+# ========== BANK SOAL (CONTOH: 1 SOAL, GANTI DENGAN RIBUAN SOAL ANDA) ==========
 QUESTION_BANK = [
     {
         "text": "Siapa yang membacakan teks proklamasi kemerdekaan Indonesia?",
@@ -70,7 +70,7 @@ QUESTION_BANK = [
         "type": "IQ",
         "national": True
     },
-    # ... tambahkan soal Anda di sini ...
+    # >>> Tempatkan semua soal Anda di sini <<<
 ]
 
 def calculate_nkhm(iq, eq, sq, aq):
@@ -90,31 +90,25 @@ def get_nkhm_level(nkhm):
     else:
         return "🌿 Perintis Jalan", "gray"
 
-# ========== FUNGSI ASISTEN AI SEDERHANA (tanpa langchain) ==========
+# ========== FUNGSI ASISTEN AI ==========
 def get_ai_response(user_input, message_history):
-    """Mengirim prompt ke OpenAI dan mengembalikan respons secara streaming."""
     if "OPENAI_API_KEY" not in st.secrets:
-        return "Maaf, fitur AI belum diatur. Silakan hubungi administrator."
-    
+        yield "Maaf, fitur AI belum diatur. Silakan hubungi administrator."
+        return
     openai.api_key = st.secrets["OPENAI_API_KEY"]
-    
-    # Siapkan pesan dengan konteks profil
     scores = st.session_state.scores
     profile_context = (
         f"Pengguna bernama {st.session_state.user}. "
         f"Skor IQ: {scores['IQ']}, EQ: {scores['EQ']}, SQ: {scores['SQ']}, AQ: {scores['AQ']}. "
-        f"Total soal dijawab: {st.session_state.total_questions}."
+        f"Total soal: {st.session_state.total_questions}."
     )
-    
-    system_prompt = f"""Kamu adalah Ki Hajar, asisten AI yang hangat dan bijaksana di aplikasi NKHM Nusantara. 
-Tugasmu membantu pengguna memahami kecerdasan (IQ, EQ, SQ, AQ), memberikan motivasi belajar, merekomendasikan soal, dan menjawab pertanyaan kebangsaan.
-Gunakan sapaan ramah. Berikut profil pengguna: {profile_context}
-"""
+    system_prompt = f"""Kamu adalah Ki Hajar, asisten AI di NKHM Nusantara. 
+Profil pengguna: {profile_context}
+Berikan jawaban ramah, singkat, dan berguna."""
     messages = [{"role": "system", "content": system_prompt}]
     for m in message_history[-10:]:
         messages.append(m)
     messages.append({"role": "user", "content": user_input})
-    
     try:
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
@@ -122,15 +116,15 @@ Gunakan sapaan ramah. Berikut profil pengguna: {profile_context}
             temperature=0.7,
             stream=True
         )
-        full_response = ""
+        full = ""
         for chunk in response:
             if chunk.choices[0].delta.get("content"):
                 content = chunk.choices[0].delta.content
-                full_response += content
-                yield full_response
+                full += content
+                yield full
                 time.sleep(0.02)
     except Exception as e:
-        yield f"Maaf, terjadi error: {str(e)}"
+        yield f"Error: {str(e)}"
 
 # ========== LOGIN ==========
 if not st.session_state.user:
@@ -155,14 +149,10 @@ if not st.session_state.user:
             else:
                 st.error("Masukkan nama dulu ya!")
 else:
-    nkhm = calculate_nkhm(
-        st.session_state.scores["IQ"],
-        st.session_state.scores["EQ"],
-        st.session_state.scores["SQ"],
-        st.session_state.scores["AQ"]
-    )
+    nkhm = calculate_nkhm(*[st.session_state.scores[t] for t in ["IQ","EQ","SQ","AQ"]])
     nkhm_level, _ = get_nkhm_level(nkhm)
-    
+
+    # ========== SIDEBAR (Statistik + AI) ==========
     with st.sidebar:
         st.markdown(f"## 👤 {st.session_state.user}")
         st.markdown("---")
@@ -171,21 +161,20 @@ else:
         st.progress(min(nkhm/100, 1.0), text="Progress ke level berikutnya")
         st.markdown("---")
         st.markdown("### 📊 Skor Kecerdasan")
-        for t in ["IQ", "EQ", "SQ", "AQ"]:
+        for t in ["IQ","EQ","SQ","AQ"]:
             st.progress(st.session_state.scores[t]/100, text=f"{t}: {st.session_state.scores[t]}")
         st.markdown("---")
         col1, col2 = st.columns(2)
         with col1:
             st.metric("📖 Total Soal", st.session_state.total_questions)
+        best = max([h.get("nkhm",0) for h in st.session_state.history] + [nkhm]) if st.session_state.history else nkhm
         with col2:
-            best = max([h.get("nkhm", 0) for h in st.session_state.history] + [nkhm])
             st.metric("🏆 Best NKHM", best)
-        if st.button("🔄 Reset Semua Skor", use_container_width=True):
-            st.session_state.scores = {"IQ": 0, "EQ": 0, "SQ": 0, "AQ": 0}
+        if st.button("🔄 Reset Skor", use_container_width=True):
+            st.session_state.scores = {"IQ":0,"EQ":0,"SQ":0,"AQ":0}
             st.session_state.history = []
             st.session_state.total_questions = 0
             st.rerun()
-        
         st.markdown("---")
         st.markdown("## 🤖 Ki Hajar (AI)")
         # Tampilkan chat history
@@ -194,7 +183,6 @@ else:
                 st.chat_message("user").write(msg["content"])
             else:
                 st.chat_message("assistant", avatar="🤖").write(msg["content"])
-        
         user_question = st.chat_input("Tanya Ki Hajar...")
         if user_question:
             st.session_state.ai_messages.append({"role": "user", "content": user_question})
@@ -209,16 +197,118 @@ else:
                 response_placeholder.markdown(full_response)
             st.session_state.ai_messages.append({"role": "assistant", "content": full_response})
             st.rerun()
-    
-    # TABS (Kuis, Dashboard, Prestasi) – sama seperti kode Anda sebelumnya
+
+    # ========== TAB UTAMA ==========
     tab1, tab2, tab3 = st.tabs(["🎮 MAIN KUIS", "📊 DASHBOARD", "🏆 PRESTASI"])
-    
+
+    # TAB 1: KUIS (dengan filter dan logika yang sudah berfungsi)
     with tab1:
-        # ... (salin dari kode Anda yang sudah berfungsi) ...
-        st.info("Tab Kuis: silakan gunakan kode Anda yang sudah ada")
-    
+        st.markdown("### 🎮 Pilih Kuis")
+        filter_col1, filter_col2 = st.columns(2)
+        with filter_col1:
+            kategori = st.radio("🏷️ Kategori", ["✨ Semua", "🇮🇩 Nasionalisme", "📚 Umum"], horizontal=True)
+        with filter_col2:
+            kecerdasan = st.selectbox("🧠 Fokus Kecerdasan", ["Semua", "IQ", "EQ", "SQ", "AQ"])
+        
+        filtered = QUESTION_BANK.copy()
+        if kategori == "🇮🇩 Nasionalisme":
+            filtered = [q for q in filtered if q["national"]]
+        elif kategori == "📚 Umum":
+            filtered = [q for q in filtered if not q["national"]]
+        if kecerdasan != "Semua":
+            filtered = [q for q in filtered if q["type"] == kecerdasan]
+        
+        if not filtered:
+            st.warning("Tidak ada soal dengan filter ini. Coba filter lain!")
+        else:
+            if "current_q" not in st.session_state:
+                st.session_state.current_q = random.choice(filtered)
+                st.session_state.answered = False
+            q = st.session_state.current_q
+            with st.container():
+                st.markdown("---")
+                st.markdown(f"### 📝 {q['text']}")
+                col_tag1, col_tag2, col_tag3 = st.columns(3)
+                with col_tag1:
+                    st.info(f"🧠 {q['type']}")
+                with col_tag2:
+                    if q['national']:
+                        st.success("🇮🇩 Nasional")
+                    else:
+                        st.info("📚 Umum")
+                with col_tag3:
+                    st.caption("+10 poin" if not st.session_state.answered else "✅ Sudah dijawab")
+                st.markdown("---")
+                selected = st.radio(
+                    "Pilih jawabanmu:", q['options'],
+                    key=f"q_{q['text']}_{st.session_state.answered}",
+                    disabled=st.session_state.answered
+                )
+                if st.button("✅ JAWAB", use_container_width=True, disabled=st.session_state.answered):
+                    st.session_state.answered = True
+                    st.session_state.total_questions += 1
+                    if selected == q['correct']:
+                        st.session_state.scores[q['type']] = min(100, st.session_state.scores[q['type']] + 10)
+                        st.success(f"✅ **BENAR!** +10 poin untuk {q['type']}")
+                    else:
+                        st.error(f"❌ **SALAH!** Jawaban benar: **{q['correct']}**")
+                    st.session_state.history.append({
+                        "timestamp": datetime.now().strftime("%H:%M:%S"),
+                        "question": q['text'][:50]+"...",
+                        "type": q['type'],
+                        "correct": selected == q['correct'],
+                        "nkhm": calculate_nkhm(st.session_state.scores["IQ"], st.session_state.scores["EQ"], st.session_state.scores["SQ"], st.session_state.scores["AQ"])
+                    })
+                    if st.button("⏩ SOAL SELANJUTNYA", use_container_width=True):
+                        st.session_state.current_q = random.choice(filtered)
+                        st.session_state.answered = False
+                        st.rerun()
+                if st.session_state.answered:
+                    if st.button("🎮 Kuis Baru", use_container_width=True):
+                        st.session_state.current_q = random.choice(filtered)
+                        st.session_state.answered = False
+                        st.rerun()
+
+    # TAB 2: DASHBOARD
     with tab2:
-        st.info("Tab Dashboard: silakan gunakan kode Anda yang sudah ada")
-    
+        st.markdown("### 📊 Dashboard Perkembangan")
+        df_chart = pd.DataFrame({
+            "Kecerdasan": ["IQ","EQ","SQ","AQ"],
+            "Skor": [st.session_state.scores["IQ"], st.session_state.scores["EQ"], st.session_state.scores["SQ"], st.session_state.scores["AQ"]]
+        })
+        st.bar_chart(df_chart.set_index("Kecerdasan"), height=300)
+        st.markdown("### 📝 Rekomendasi Peningkatan")
+        lowest = min(st.session_state.scores, key=st.session_state.scores.get)
+        if st.session_state.scores[lowest] < 50:
+            st.info(f"💡 **Tingkatkan {lowest}:** Latihan lebih giat di bagian {lowest}!")
+        else:
+            st.success("🌟 Semua kecerdasan sudah terasah dengan baik!")
+        if st.session_state.history:
+            st.markdown("### 📜 Riwayat Kuis (10 Terakhir)")
+            history_df = pd.DataFrame(st.session_state.history[-10:])
+            history_df = history_df[["timestamp","type","question","correct"]]
+            history_df["correct"] = history_df["correct"].map({True:"✅", False:"❌"})
+            history_df.columns = ["Waktu","Tipe","Soal","Hasil"]
+            st.dataframe(history_df, use_container_width=True, hide_index=True)
+
+    # TAB 3: PRESTASI
     with tab3:
-        st.info("Tab Prestasi: silakan gunakan kode Anda yang sudah ada")
+        st.markdown("### 🏆 Pencapaianmu")
+        cols = st.columns(4)
+        badges = {"IQ":"🧠 Cendekia", "EQ":"❤️ Empati", "SQ":"🙏 Bhinneka", "AQ":"💪 Tangguh"}
+        for i, (t, label) in enumerate(badges.items()):
+            if st.session_state.scores[t] >= 50:
+                cols[i].success(f"✅ **{label}**")
+            else:
+                cols[i].info(f"🔒 {label} (butuh 50)")
+        if all(st.session_state.scores[t] >= 50 for t in ["IQ","EQ","SQ","AQ"]):
+            st.balloons()
+            st.success("🎉 **GELAR: PAHLAWAN CERDAS NUSANTARA!** 🎉")
+        st.markdown("---")
+        answered = len(st.session_state.history)
+        correct = sum(1 for h in st.session_state.history if h["correct"])
+        accuracy = (correct / answered * 100) if answered > 0 else 0
+        col1, col2, col3 = st.columns(3)
+        col1.metric("📖 Total Soal", answered)
+        col2.metric("✅ Benar", correct)
+        col3.metric("📊 Akurasi", f"{accuracy:.1f}%")
