@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import random
 from datetime import datetime
-import os
 
 # ========== SPLASH SCREEN ==========𝐪𝐩𝐚𝐦𝐲𝐦 𝐥
 
