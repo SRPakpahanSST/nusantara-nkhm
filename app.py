@@ -2,7 +2,44 @@ import streamlit as st
 import pandas as pd
 import random
 from datetime import datetime
-import os
+import openai
+import time
+
+# ========== FUNGSI ASISTEN AI ==========
+def get_ai_response(user_input, message_history):
+    if "OPENAI_API_KEY" not in st.secrets:
+        yield "Maaf, fitur AI belum diatur. Silakan hubungi administrator."
+        return
+    openai.api_key = st.secrets["OPENAI_API_KEY"]
+    scores = st.session_state.scores
+    profile_context = (
+        f"Pengguna bernama {st.session_state.user}. "
+        f"Skor IQ: {scores['IQ']}, EQ: {scores['EQ']}, SQ: {scores['SQ']}, AQ: {scores['AQ']}. "
+        f"Total soal: {st.session_state.total_questions}."
+    )
+    system_prompt = f"""Kamu adalah Ki Hajar, asisten AI di NKHM Nusantara. 
+Profil pengguna: {profile_context}
+Berikan jawaban ramah, singkat, dan berguna."""
+    messages = [{"role": "system", "content": system_prompt}]
+    for m in message_history[-10:]:
+        messages.append(m)
+    messages.append({"role": "user", "content": user_input})
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages,
+            temperature=0.7,
+            stream=True
+        )
+        full = ""
+        for chunk in response:
+            if chunk.choices[0].delta.get("content"):
+                content = chunk.choices[0].delta.content
+                full += content
+                yield full
+                time.sleep(0.02)
+    except Exception as e:
+        yield f"Error: {str(e)}"
 
 # ========== SPLASH SCREEN ==========𝐪𝐩𝐚𝐦𝐲𝐦 𝐥
 
