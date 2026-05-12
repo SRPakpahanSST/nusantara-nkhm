@@ -8,59 +8,59 @@ import time
 # ========== SPLASH SCREEN ==========
 if not st.session_state.get("splash_selesai", False):
     st.set_page_config(page_title="NKHM Nusantara", page_icon="🇮🇩", layout="wide")
+
+    # Tempat untuk splash
     splash_holder = st.empty()
+
     with splash_holder.container():
+        # Gunakan div dengan text-align:center untuk semua konten
         st.markdown('<div style="text-align: center;">', unsafe_allow_html=True)
+
+        # Logo (pastikan URL benar)
         logo_url = "https://raw.githubusercontent.com/SRPakpahanSST/nusantara-nkhm/main/assets/pmd_logo.jpg"
         st.markdown(f'<img src="{logo_url}" width="180">', unsafe_allow_html=True)
+
+        # Judul
         st.markdown("<h1>NKHM Nusantara</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='font-size: 18px;'>Aplikasi gaming 4 Kecerdasan (IQ, EQ, SQ, AQ) + Nasionalisme<br>Berbasis Perkembangan Data Personal</p>", unsafe_allow_html=True)
+
+        # Deskripsi
+        st.markdown(
+            "<p style='font-size: 18px;'>Aplikasi gaming 4 Kecerdasan (IQ, EQ, SQ, AQ) + Nasionalisme<br>"
+            "Berbasis Perkembangan Data Personal</p>",
+            unsafe_allow_html=True,
+        )
+
         st.markdown('</div>', unsafe_allow_html=True)
-        st.markdown("""
-        <style>
-        div.stButton > button {
-            background-color: #4CAF50;
-            color: white;
-            font-size: 22px;
-            font-weight: bold;
-            border-radius: 12px;
-            padding: 12px;
-            width: 100%;
-        }
-        </style>
-        """, unsafe_allow_html=True)
+
+        # CSS tombol hijau besar lebar penuh
+        st.markdown(
+            """
+            <style>
+            div.stButton > button {
+                background-color: #4CAF50;
+                color: white;
+                font-size: 22px;
+                font-weight: bold;
+                border-radius: 12px;
+                padding: 12px;
+                width: 100%;
+            }
+            div.stButton > button:hover {
+                background-color: #45a049;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        # Tombol Mulai
         if st.button("🚀 Mulai", use_container_width=True):
             st.session_state.splash_selesai = True
             st.rerun()
+
+    # Hentikan eksekusi sampai tombol ditekan
     st.stop()
-
-# ========== APLIKASI UTAMA ==========
-st.set_page_config(page_title="NKHM Nusantara", page_icon="🇮🇩", layout="wide")
-
-st.markdown("""
-<style>
-    .stButton > button { width: 100%; font-size: 18px; padding: 10px; }
-    .stProgress > div > div { background-color: #4CAF50; }
-    h1, h2, h3 { text-align: center; }
-    @media (max-width: 768px) {
-        .stTabs [data-baseweb="tab-list"] { gap: 8px; }
-        .stTabs [data-baseweb="tab"] { font-size: 12px; }
-    }
-</style>
-""", unsafe_allow_html=True)
-
-# Inisialisasi session state
-if "user" not in st.session_state:
-    st.session_state.user = ""
-if "scores" not in st.session_state:
-    st.session_state.scores = {"IQ": 0, "EQ": 0, "SQ": 0, "AQ": 0}
-if "history" not in st.session_state:
-    st.session_state.history = []
-if "total_questions" not in st.session_state:
-    st.session_state.total_questions = 0
-if "ai_messages" not in st.session_state:
-    st.session_state.ai_messages = []
-
+    
 # ========== BANK SOAL (CONTOH: 1 SOAL, GANTI DENGAN RIBUAN SOAL ANDA) ==========
 QUESTION_BANK = [
     {
