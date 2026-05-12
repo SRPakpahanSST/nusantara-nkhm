@@ -10,7 +10,7 @@ def get_ai_response(user_input, message_history):
     if "OPENAI_API_KEY" not in st.secrets:
         yield "Maaf, fitur AI belum diatur. Silakan hubungi administrator."
         return
-    openai.api_key = st.secrets["OPENAI_API_KEY"]
+    openai.api_key = st.secrets["‎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"]
     scores = st.session_state.scores
     profile_context = (
         f"Pengguna bernama {st.session_state.user}. "
