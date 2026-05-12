@@ -469,4 +469,4 @@ else:
         col1, col2, col3 = st.columns(3)
         col1.metric("📖 Total Soal", answered)
         col2.metric("✅ Benar", correct)
-        col3.metric("📊 Akurasi", f"{accuracy:.1f}%")l
+        col3.metric("📊 Akurasi", f"{accuracy:.1f}%")
